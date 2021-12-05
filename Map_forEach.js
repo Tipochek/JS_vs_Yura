@@ -96,17 +96,15 @@ const ARRAY = [
 
 /* #1 */
 function doubleNumbers(arr){
-  return arr.map((elem) => typeof elem === Number ? elem * 2 : elem);
+  return arr.map((elem) => !isNaN(Number(elem)) ? elem * 2 : elem);
 }
 
-console.log(doubleNumbers([2, 5, '100'])); // [4, 10, '100']
+console.log(doubleNumbers([2, 5, '100A', '100'])); //  [4, 10, '100A', 200 ]
 
 
 
 /* #2 */
-function stringItUp(arr){
-  return arr.map((elem) => `${elem}`);
-}
+const stringItUp = (arr) => arr.map((elem) => `${elem}`);
 
 console.log(stringItUp([2, 5, 100])); // ["2", "5", "100"]
 
@@ -114,7 +112,7 @@ console.log(stringItUp([2, 5, 100])); // ["2", "5", "100"]
 
 /* #3 */
 function capitalizeNames(arr){
-  return arr.map((elem) => `${elem.slice(0, 1).toUpperCase() + elem.slice(1).toLowerCase()}`);
+  return arr.map((elem) => `${elem.slice(0, 1).toUpperCase()}${elem.slice(1).toLowerCase()}`);
 }
 
 console.log(capitalizeNames(["john", "JACOB", "jinGleHeimer", "schmidt"])); // ["John", "Jacob", "Jingleheimer", "Schmidt"]
@@ -122,9 +120,7 @@ console.log(capitalizeNames(["john", "JACOB", "jinGleHeimer", "schmidt"])); // [
 
 
 /* #4 */
-function namesOnly(arr){
-  return arr.map((elem) => elem.name);
-}
+const namesOnly = (arr) => arr.map(({name}) => name);
 
 console.log(namesOnly(ARRAY));
 // ["Angelina Jolie", "Eric Jones", "Paris Hilton", "Kayne West", "Bob Ziroll"]
@@ -133,10 +129,10 @@ console.log(namesOnly(ARRAY));
 
 /* #5 */
 function makeStrings(arr){
-  const staticTextMatrix = ' can go to The Matrix';
-  const staticTextMaloletka = ' is under age!!';
+  const staticTextMatrix = 'can go to The Matrix';
+  const staticTextMaloletka = 'is under age!!';
 
-  return arr.map((elem) => elem.age <= 50 ? `${elem.name + staticTextMaloletka}` : `${elem.name + staticTextMatrix}`);
+  return arr.map(({name, age}) => age <= 50 ? `${name} ${staticTextMaloletka}` : `${name} ${staticTextMatrix}`);
 }
 
 console.log(makeStrings(ARRAY));
@@ -149,9 +145,7 @@ console.log(makeStrings(ARRAY));
 
 
 /* #6 */
-function readyToPutInTheDOM(arr){
-  return arr.map((elem) => `<h1>${elem.name}</h1><h2>${elem.age}</h2>`);
-}
+const readyToPutInTheDOM = (arr) => arr.map(({name, age}) => `<h1>${name}</h1><h2>${age}</h2>`);
 
 console.log(readyToPutInTheDOM(ARRAY));
 // ["<h1>Angelina Jolie</h1><h2>80</h2>",
