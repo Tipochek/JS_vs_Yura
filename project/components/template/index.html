@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+  <title>Test task</title>
+</head>
+
+<body>
+  <div id="holder" class="container"></div>
+  
+  <script type="module">
+    import Template from './index.js';
+
+    const template = new Template();
+
+    holder.append(template.element);
+  </script>
+</body>
