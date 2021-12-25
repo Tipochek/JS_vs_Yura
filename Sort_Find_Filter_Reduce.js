@@ -1,35 +1,31 @@
-/* #1 *
+/* #1 */
 
-let arr = [5, 2, 1, -10, 8];
-arr.sort((a, b) => b - a);
+let arr1 = [5, 2, 1, -10, 8];
+arr1.sort((a, b) => b - a);
 
-console.log( arr ); // 8, 5, 2, 1, -10
+console.log( arr1 ); // 8, 5, 2, 1, -10
 
 
 
-/* #2 *
-let arr = ["HTML", "JavaScript", "CSS"];
-let sorted = copySorted(arr);
+/* #2 */
+const copySorted = (arr) => [...arr].sort();
 
-function copySorted(arr) {
-  const a = arr.map(elem => elem);
-  return a.sort();
-  // return arr.slice().sort();
-}
+let arr2 = ["HTML", "JavaScript", "CSS"];
+let sorted = copySorted(arr2);
 
 console.log( sorted ); // CSS, HTML, JavaScript
-console.log( arr ); // HTML, JavaScript, CSS (без изменений)
+console.log( arr2 ); // HTML, JavaScript, CSS (без изменений)
 
 
 
-/* #3 *
+/* #3 */
 let vasya = { name: "Вася", age: 25 };
 let petya = { name: "Петя", age: 30 };
 let masha = { name: "Маша", age: 28 };
 
-let arr = [ vasya, petya, masha ];
+let arr3 = [ vasya, petya, masha ];
 
-sortByAge(arr);
+sortByAge(arr3);
 function sortByAge(arr) {
   // const a = arr.map(({name,age}) => ({[age]: name}));
   // const b = arr.map(({age}) => age);
@@ -42,9 +38,9 @@ function sortByAge(arr) {
 }
 
 // теперь: [vasya, masha, petya]
-console.log(arr[0].name); // Вася
-console.log(arr[1].name); // Маша
-console.log(arr[2].name); // Петя
+console.log(arr3[0].name); // Вася
+console.log(arr3[1].name); // Маша
+console.log(arr3[2].name); // Петя
 
 
 /*
@@ -74,7 +70,7 @@ console.log(arr);
 // 1) Turn an array of numbers into a total of all the numbers
 
 function total(arr) {
-  return arr.reduce((prev, curr) => prev + curr);
+  return arr.reduce((prev, curr) => prev + curr, 0);
 }
 
 console.log(total([1,2,3,4,5])); // 15
@@ -84,7 +80,7 @@ console.log(total([1,2,3,4,5])); // 15
 // 2) Turn an array of numbers into a long string of all those numbers.
 
 function stringConcat(arr) {
-  return arr.reduce((prev, curr) => `${prev}${curr}`);
+  return arr.reduce((prev, curr) => `${prev}${curr}`, '');
 }
 
 console.log(stringConcat([1,2,3])); // "123"
@@ -110,13 +106,18 @@ var voters = [
     {name: 'Jeff', age: 30, voted: true},
     {name: 'Zack', age: 19, voted: false}
 ];
+
 console.log(totalVotes(voters)); // 7
 
 
 
 // 4) Given an array of all your wishlist items, figure out how much it would cost to just buy everything at once
 function shoppingSpree(arr) {
-  return arr.reduce((prev, {price}) => prev + price, 0);
+  return arr.reduce((prev, {price}) => {
+    if (!isNaN(Number(price))) {
+      return prev + price;
+    }
+  }, 0);
 }
 
 var wishlist = [
@@ -133,6 +134,8 @@ console.log(shoppingSpree(wishlist)); // 227005
 
 // 5) Given an array of arrays, flatten them into a single array
 function flatten(arr) {
+  return arr.flat();
+  return arr.reduce((prev, curr) => [...prev, ...curr], []);
   return arr.reduce((prev, curr) => prev.concat(curr), []);
 }
 
@@ -183,7 +186,7 @@ function voterResults(arr) {
     numOldsPeople
   }
 
-  return arr.reduce((obj, {age , voted}) => {
+  const result = arr.reduce((obj, {age , voted}) => {
     if (age <= 25) {
       obj.numYoungPeople += 1;
       obj.numYoungVotes = voted ? obj.numYoungVotes + 1 : obj.numYoungVotes;
@@ -198,6 +201,8 @@ function voterResults(arr) {
     return obj;
 
   }, obj);
+
+  return result;
 }
 
 console.log(voterResults(voters)); // Returned value shown below:
