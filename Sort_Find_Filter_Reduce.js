@@ -170,20 +170,20 @@ var voters = [
 ];
 
 function voterResults(arr) {
-  const numYoungVotes = 0;
-  const numYoungPeople = 0;
-  const numMidVotesPeople = 0;
-  const numMidsPeople = 0;
-  const numOldVotesPeople = 0;
-  const numOldsPeople = 0;
+  // const numYoungVotes = 0;
+  // const numYoungPeople = 0;
+  // const numMidVotesPeople = 0;
+  // const numMidsPeople = 0;
+  // const numOldVotesPeople = 0;
+  // const numOldsPeople = 0;
 
   const obj = {
-    numYoungVotes,
-    numYoungPeople,
-    numMidVotesPeople,
-    numMidsPeople,
-    numOldVotesPeople,
-    numOldsPeople
+    numYoungVotes: 0,
+    numYoungPeople: 0,
+    numMidVotesPeople: 0,
+    numMidsPeople: 0,
+    numOldVotesPeople: 0,
+    numOldsPeople: 0,
   }
 
   const result = arr.reduce((obj, {age , voted}) => {
