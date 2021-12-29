@@ -7,7 +7,7 @@ export default class Template {
 
   get template() {
     return `
-      <div>TEST</div>
+      <h1>Rick & Morty table</h1>
     `;
   }
 
