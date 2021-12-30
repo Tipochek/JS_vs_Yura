@@ -30,6 +30,14 @@ export default class Template {
     return this.element
   }
 
+  renderSorted(data) {
+    const [thead] = this.element.getElementsByTagName('thead');
+    const tbody = document.createElement('tbody');
+    tbody.innerHTML = this.renderTableContent(data);
+
+    return thead.after(tbody);
+  }
+
   renderTableHeader() {
     let emptyTableHeaderCell;
     let tableTitle = this.configuration.map(tableTitle => `<th>${tableTitle}</th>`).join('');
@@ -53,11 +61,12 @@ export default class Template {
     `;
   }
 
-  renderTableContent() {
+  renderTableContent(sortedData) {
+    const data = sortedData || this.data;
     let tableRow;
 
-    if (this.data.length > 0 && this.configuration.length > 0) {
-      tableRow = this.data.reduce((prev, current, index) => {
+    if (data.length > 0 && this.configuration.length > 0) {
+      tableRow = data.reduce((prev, current, index) => {
         const rowNumber = `<td>${++index}</td>`
 
         let row = this.configuration.map(td => {
@@ -71,9 +80,9 @@ export default class Template {
 
           return `<td>${current[td.toLowerCase()]}</td>`;
         }).join('');
-        return [...prev, `<tr>${rowNumber}${row}</tr>`];
+        return [...prev, `<tr>${rowNumber}${row}</tr>`].join('');
       }, []);
-    } else if (this.data.length > 0 && this.configuration.length == 0) {
+    } else if (data.length > 0 && this.configuration.length == 0) {
       tableRow = `
         <tr>
           <td>Data received but <b>no</b> configuration</td>
@@ -96,25 +105,17 @@ export default class Template {
     `;
   }
 
-  tableSort(sort) {
-    const sortByParam = sort.textContent.toLowerCase();
-    const newArr = [...this.data];
-    console.log(sortByParam);
-    console.log(newArr);
-    console.log(this.data);
+  tableSort(elem) {
+    const sortBy = elem.textContent.toLowerCase();
+    const sortedArr = [...this.data].sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
 
-    const sortedArr = newArr.sort((a, b) => {
-      // console.log(a)
-      // console.log(b)
+    this.removeTableContent();
+    this.renderSorted(sortedArr);
+  }
 
-      if (a.sortByParam > b.sortByParam) {
-        return 1;
-      } else {
-        return -1;
-      }
-
-    });
-    // console.log(sortedArr);
+  removeTableContent() {
+    const [tbody] = this.element.getElementsByTagName('tbody');
+    tbody.remove();
   }
 
   bindEvents() {
