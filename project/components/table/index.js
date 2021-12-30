@@ -106,8 +106,17 @@ export default class Template {
   }
 
   tableSort(elem) {
-    const sortBy = elem.textContent.toLowerCase();
-    const sortedArr = [...this.data].sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
+    let sortBy = elem.textContent.toLowerCase();
+    let sortedArr;
+
+    if (sortBy === 'avatar') {
+      return false;
+    } else if (sortBy === 'number of episodes') {
+      sortBy = 'episode';
+      sortedArr = [...this.data].sort((a, b) => (a[sortBy].length > b[sortBy].length) ? 1 : -1);
+    } else {
+      sortedArr = [...this.data].sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
+    }
 
     this.removeTableContent();
     this.renderSorted(sortedArr);
