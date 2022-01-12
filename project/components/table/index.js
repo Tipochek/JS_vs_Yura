@@ -42,10 +42,12 @@ export default class Template {
 
   renderTableHeader() {
     let emptyTableHeaderCell;
-    let tableTitle = this.configuration.map((tableTitle, index) => `<th data-id="${++index}" ${this.dataSortingDirection}>${tableTitle}</th>`).join('');
+    let tableTitle = this.configuration.map(
+      (tableTitle, index) => `<th data-id="${++index}" ${this.dataSortingDirection}>${tableTitle}</th>`
+    ).join('');
 
     if (this.data.length > 0 && this.configuration.length > 0) {
-      emptyTableHeaderCell = `<th></th>`;
+      emptyTableHeaderCell = `<th>№</th>`;
     } else if (this.data.length == 0 && this.configuration.length > 0) {
       emptyTableHeaderCell = null;
     } else {
@@ -108,22 +110,20 @@ export default class Template {
   }
 
   sortingStatusCheck(elem) {
+    const sortDirectionUp = 'up';
+    const sortDirectionDown = 'down';
     const indexElement = elem.dataset.id;
     // console.log(indexElement)
     this.removeSortingStatus(indexElement - 1);
 
-    if (elem.dataset?.sortingDirection === '') {
-      console.log('Set sorting FIRST equal DOWN')
-      elem.setAttribute(this.dataSortingDirection, 'down')
-      this.tableSort(elem)
-    } else if (elem.dataset?.sortingDirection === 'down') {
-      console.log('Set sorting UP')
-      elem.setAttribute(this.dataSortingDirection, 'up')
-      this.tableSort(elem)
+    if (elem.dataset?.sortingDirection === '' || elem.dataset?.sortingDirection === sortDirectionUp) {
+      // console.log(sortDirectionDown)
+      elem.setAttribute(this.dataSortingDirection, sortDirectionDown)
+      this.tableSort(elem, sortDirectionDown)
     } else {
-      console.log('Set sorting DOWN')
-      elem.setAttribute(this.dataSortingDirection, 'down')
-      this.tableSort(elem)
+      // console.log(sortDirectionUp)
+      elem.setAttribute(this.dataSortingDirection, sortDirectionUp)
+      this.tableSort(elem, sortDirectionUp)
     }
   }
 
@@ -140,7 +140,7 @@ export default class Template {
     }
   }
 
-  tableSort(elem) {
+  tableSort(elem, param) {
     let sortBy = elem.innerText.toLowerCase();
     let sortedArr;
 
@@ -148,9 +148,17 @@ export default class Template {
       return false;
     } else if (sortBy === 'number of episodes') {
       sortBy = 'episode';
-      sortedArr = [...this.data].sort((a, b) => (a[sortBy].length > b[sortBy].length) ? 1 : -1);
+      if (param === 'down') {
+        sortedArr = [...this.data].sort((a, b) => (a[sortBy].length > b[sortBy].length) ? 1 : -1);
+      } else {
+        sortedArr = [...this.data].sort((a, b) => (a[sortBy].length > b[sortBy].length) ? -1 : 1);
+      }
     } else {
-      sortedArr = [...this.data].sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
+      if (param === 'down') {
+        sortedArr = [...this.data].sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
+      } else {
+        sortedArr = [...this.data].sort((a, b) => (a[sortBy] > b[sortBy]) ? -1 : 1);
+      }
     }
 
     this.removeTableContent();
