@@ -4,6 +4,8 @@ export default class Template {
   constructor({ data = [], configuration = [] } = {}) {
     this.data = data;
     this.configuration = configuration;
+    this.dataSortingDirection = `data-sorting-direction`;
+    this.prevIndex = 0;
 
     // console.log(this.data);
     this.render();
@@ -40,7 +42,7 @@ export default class Template {
 
   renderTableHeader() {
     let emptyTableHeaderCell;
-    let tableTitle = this.configuration.map(tableTitle => `<th>${tableTitle}</th>`).join('');
+    let tableTitle = this.configuration.map((tableTitle, index) => `<th data-id="${++index}" ${this.dataSortingDirection}>${tableTitle}</th>`).join('');
 
     if (this.data.length > 0 && this.configuration.length > 0) {
       emptyTableHeaderCell = `<th></th>`;
@@ -105,8 +107,41 @@ export default class Template {
     `;
   }
 
+  sortingStatusCheck(elem) {
+    const indexElement = elem.dataset.id;
+    // console.log(indexElement)
+    this.removeSortingStatus(indexElement - 1);
+
+    if (elem.dataset?.sortingDirection === '') {
+      console.log('Set sorting FIRST equal DOWN')
+      elem.setAttribute(this.dataSortingDirection, 'down')
+      this.tableSort(elem)
+    } else if (elem.dataset?.sortingDirection === 'down') {
+      console.log('Set sorting UP')
+      elem.setAttribute(this.dataSortingDirection, 'up')
+      this.tableSort(elem)
+    } else {
+      console.log('Set sorting DOWN')
+      elem.setAttribute(this.dataSortingDirection, 'down')
+      this.tableSort(elem)
+    }
+  }
+
+  removeSortingStatus(index) {
+    let arrTh = this.element.querySelectorAll('th');
+    // console.log(index)
+    // console.log(this.prevIndex)
+
+    if (this.prevIndex === index) {
+      return;
+    } else {
+      arrTh.forEach(item => item.setAttribute(this.dataSortingDirection, ''));
+      return this.prevIndex = index;
+    }
+  }
+
   tableSort(elem) {
-    let sortBy = elem.textContent.toLowerCase();
+    let sortBy = elem.innerText.toLowerCase();
     let sortedArr;
 
     if (sortBy === 'avatar') {
@@ -132,7 +167,7 @@ export default class Template {
 
     thead.addEventListener('click', (e) => {
       // console.log(e.target);
-      this.tableSort(e.target);
+      this.sortingStatusCheck(e.target);
     })
   }
 
