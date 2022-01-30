@@ -43,7 +43,7 @@ export default class Template {
   renderTableHeader() {
     let emptyTableHeaderCell;
     let tableTitle = this.configuration.map(
-      (tableTitle, index) => `<th data-id="${++index}" ${this.dataSortingDirection}>${tableTitle}</th>`
+      (tableTitle) => `<th data-id="${tableTitle.toLowerCase()}" ${this.dataSortingDirection}>${tableTitle}</th>`
     ).join('');
 
     if (this.data.length > 0 && this.configuration.length > 0) {
@@ -69,7 +69,21 @@ export default class Template {
     const data = sortedData || this.data;
     let tableRow;
 
-    if (data.length > 0 && this.configuration.length > 0) {
+    if (!data.length && !this.configuration.length) {
+      const colspan = this.configuration.length;
+
+      tableRow = `
+        <tr>
+          <td colspan="${colspan}">No data received</td>
+        </tr>
+      `;
+    } else if (data.length > 0 && !this.configuration.length) {
+      tableRow = `
+        <tr>
+          <td>Data received but <b>no</b> configuration</td>
+        </tr>
+      `;
+    } else {
       tableRow = data.reduce((prev, current, index) => {
         const rowNumber = `<td>${++index}</td>`
 
@@ -86,20 +100,6 @@ export default class Template {
         }).join('');
         return [...prev, `<tr>${rowNumber}${row}</tr>`].join('');
       }, []);
-    } else if (data.length > 0 && this.configuration.length == 0) {
-      tableRow = `
-        <tr>
-          <td>Data received but <b>no</b> configuration</td>
-        </tr>
-      `;
-    } else {
-      const colspan = this.configuration.length;
-
-      tableRow = `
-        <tr>
-          <td colspan="${colspan}">No data received</td>
-        </tr>
-      `;
     }
 
     return `
@@ -128,16 +128,14 @@ export default class Template {
   }
 
   removeSortingStatus(index) {
-    let arrTh = this.element.querySelectorAll('th');
+    const arrTh = this.element.querySelectorAll('th');
     // console.log(index)
     // console.log(this.prevIndex)
 
-    if (this.prevIndex === index) {
-      return;
-    } else {
-      arrTh.forEach(item => item.setAttribute(this.dataSortingDirection, ''));
-      return this.prevIndex = index;
-    }
+    if (this.prevIndex === index) return;
+
+    arrTh.forEach(item => item.setAttribute(this.dataSortingDirection, ''));
+    return this.prevIndex = index;
   }
 
   tableSort(elem, param) {
@@ -181,5 +179,8 @@ export default class Template {
 
   destroy() {
     this.element.remove();
+    thead.removeEventListener('click', (e) => {
+      this.sortingStatusCheck(e.target);
+    })
   }
 }
