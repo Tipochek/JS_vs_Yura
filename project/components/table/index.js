@@ -1,14 +1,26 @@
 export default class Template {
   element; // HTMLElement;
+  TEXT_SORT_CONFIG = 'sortConfig';
 
-  constructor({ data = [], configuration = [] } = {}) {
+  constructor({
+      data = [],
+      configuration = [],
+      defaultSortConfig = {
+        sortParam: 'name',
+        sortDirection: 'down'
+      }
+    } = {}) {
+
     this.data = data;
+    this.sortedData = null;
     this.configuration = configuration;
+    this.defaultSortConfig = defaultSortConfig;
     this.dataSortingDirection = `data-sorting-direction`;
-    this.prevIndex = 0;
+    this.sortParam = this.defaultSortConfig.sortParam;
+    this.sortDirection = this.defaultSortConfig.sortDirection;
 
-    // console.log(this.data);
     this.render();
+    this.bindEvents();
   }
 
   get template() {
@@ -27,23 +39,29 @@ export default class Template {
 
     this.element = element.firstElementChild;
 
-    this.bindEvents();
-
-    return this.element
+    return this.element;
   }
 
-  renderSorted(data) {
+  update() {
     const [thead] = this.element.getElementsByTagName('thead');
-    const tbody = document.createElement('tbody');
-    tbody.innerHTML = this.renderTableContent(data);
-
-    return thead.after(tbody);
+    thead.innerHTML = this.renderTableHeader();
+    const [tbody] = this.element.getElementsByTagName('tbody');
+    tbody.innerHTML = this.renderTableContent();
   }
 
   renderTableHeader() {
+    //TODO:
+    const sortConfigFromSessionStorage = JSON.parse(sessionStorage.getItem(this.TEXT_SORT_CONFIG));
+    const isSortConfigSessionStorage = !!Object.keys(sortConfigFromSessionStorage || {}).length;
+    let sortParam = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortParam : this.defaultSortConfig.sortParam;
+    let sortDirection = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortDirection : this.defaultSortConfig.sortDirection;
+
     let emptyTableHeaderCell;
+
+    console.log(this.sortParam)
+
     let tableTitle = this.configuration.map(
-      (tableTitle) => `<th data-id="${tableTitle.toLowerCase()}" ${this.dataSortingDirection}>${tableTitle}</th>`
+      (elem) => `<th data-id="${elem.toLowerCase()}" ${this.dataSortingDirection}${elem.toLowerCase() === this.sortParam ? `="${sortDirection}"` : ''} >${elem}</th>`
     ).join('');
 
     if (this.data.length > 0 && this.configuration.length > 0) {
@@ -65,11 +83,11 @@ export default class Template {
     `;
   }
 
-  renderTableContent(sortedData) {
-    const data = sortedData || this.data;
+  renderTableContent() {
+    const data = this.sortedData || this.data;
     let tableRow;
 
-    if (!data.length && !this.configuration.length) {
+    if (!data?.length && !this.configuration?.length) {
       const colspan = this.configuration.length;
 
       tableRow = `
@@ -109,78 +127,83 @@ export default class Template {
     `;
   }
 
-  sortingStatusCheck(elem) {
+  setSortingConfigToSessionStorage(id, direction) {
+    const sortConfig = {
+      sortParam: id,
+      sortDirection: direction
+    }
+
+    sessionStorage.setItem(this.TEXT_SORT_CONFIG, JSON.stringify(sortConfig));
+  }
+
+  getSortingConfigToSessionStorage() {
+    //TODO:
+  }
+
+  removeSortingStatus() {
+    const arrTh = this.element.querySelectorAll('th');
+    arrTh.forEach(item => item.setAttribute(this.dataSortingDirection, ''));
+  }
+
+  tableSort(elem) {
     const sortDirectionUp = 'up';
     const sortDirectionDown = 'down';
-    const indexElement = elem.dataset.id;
-    // console.log(indexElement)
-    this.removeSortingStatus(indexElement - 1);
 
-    if (elem.dataset?.sortingDirection === '' || elem.dataset?.sortingDirection === sortDirectionUp) {
-      // console.log(sortDirectionDown)
-      elem.setAttribute(this.dataSortingDirection, sortDirectionDown)
-      this.tableSort(elem, sortDirectionDown)
-    } else {
-      // console.log(sortDirectionUp)
-      elem.setAttribute(this.dataSortingDirection, sortDirectionUp)
-      this.tableSort(elem, sortDirectionUp)
-    }
-  }
-
-  removeSortingStatus(index) {
-    const arrTh = this.element.querySelectorAll('th');
-    // console.log(index)
-    // console.log(this.prevIndex)
-
-    if (this.prevIndex === index) return;
-
-    arrTh.forEach(item => item.setAttribute(this.dataSortingDirection, ''));
-    return this.prevIndex = index;
-  }
-
-  tableSort(elem, param) {
-    let sortBy = elem.innerText.toLowerCase();
+    //TODO:
+    const sortConfigFromSessionStorage = JSON.parse(sessionStorage.getItem(this.TEXT_SORT_CONFIG));
+    const isSortConfigSessionStorage = !!Object.keys(sortConfigFromSessionStorage || {}).length;
+    let sortParam = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortParam : this.defaultSortConfig.sortParam;
+    let sortDirection = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortDirection : this.defaultSortConfig.sortDirection;
     let sortedArr;
 
-    if (sortBy === 'avatar') {
+    // console.log(elem)
+    // console.log(elem.dataset.id)
+
+    // console.log({isSortConfigSessionStorage})
+    // console.log({sortConfigFromSessionStorage})
+    // console.log(this.defaultSortConfig)
+    // console.log({sortParam})
+    // console.log({sortDirection})
+
+    // this.sortParam = elem.dataset.id;
+
+    if (sortParam === 'avatar') {
       return false;
-    } else if (sortBy === 'number of episodes') {
-      sortBy = 'episode';
-      if (param === 'down') {
-        sortedArr = [...this.data].sort((a, b) => (a[sortBy].length > b[sortBy].length) ? 1 : -1);
+    } else if (sortParam === 'number of episodes') {
+      sortParam = 'episode';
+      if (sortDirection === sortDirectionDown) {
+        sortedArr = [...this.data].sort((a, b) => (a[sortParam].length > b[sortParam].length) ? 1 : -1);
+        sortDirection = sortDirectionUp;
       } else {
-        sortedArr = [...this.data].sort((a, b) => (a[sortBy].length > b[sortBy].length) ? -1 : 1);
+        sortedArr = [...this.data].sort((a, b) => (a[sortParam].length > b[sortParam].length) ? -1 : 1);
+        sortDirection = sortDirectionDown;
       }
     } else {
-      if (param === 'down') {
-        sortedArr = [...this.data].sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
+      if (sortDirection === sortDirectionDown) {
+        sortedArr = [...this.data].sort((a, b) => (a[sortParam] > b[sortParam]) ? 1 : -1);
+        sortDirection = sortDirectionUp;
       } else {
-        sortedArr = [...this.data].sort((a, b) => (a[sortBy] > b[sortBy]) ? -1 : 1);
+        sortedArr = [...this.data].sort((a, b) => (a[sortParam] > b[sortParam]) ? -1 : 1);
+        sortDirection = sortDirectionDown;
       }
     }
 
-    this.removeTableContent();
-    this.renderSorted(sortedArr);
-  }
-
-  removeTableContent() {
-    const [tbody] = this.element.getElementsByTagName('tbody');
-    tbody.remove();
+    this.sortedData = sortedArr;
+    this.setSortingConfigToSessionStorage(sortParam, sortDirection);
+    this.update();
   }
 
   bindEvents() {
     let [thead] = this.element.getElementsByTagName('thead');
 
     thead.addEventListener('click', (e) => {
-      // console.log(e.target);
-      this.sortingStatusCheck(e.target);
+      this.tableSort(e.target);
     })
   }
 
   destroy() {
+    thead.removeEventListener('click', this.tableSort());
+
     this.element.remove();
-    thead.removeEventListener('click', (e) => {
-      this.sortingStatusCheck(e.target);
-    })
   }
 }

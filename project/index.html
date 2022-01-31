@@ -27,8 +27,13 @@
       'Gender',
       'Number of episodes'
     ];
+    const defaultSortConfig = {
+      sortParam: 'name',
+      sortDirection: 'down'
+    }
+
     const template = new Template();
-    const table = new Table({data: jsonData, configuration: tableHeaders});
+    const table = new Table({data: jsonData, configuration: tableHeaders, defaultSortConfig: defaultSortConfig});
 
     App.append(template.element);
     App.append(table.element);
