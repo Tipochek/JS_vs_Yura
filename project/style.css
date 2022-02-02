@@ -1,0 +1,30 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    padding: 40px;
+}
+
+h1 {
+    margin: 0 0 40px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid black;
+}
+
+th[data-sorting-direction="down"]::after {
+    content: '\01F847';
+}
+
+th[data-sorting-direction="up"]::after {
+    content: '\01F845';
+}
