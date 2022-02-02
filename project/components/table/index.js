@@ -33,6 +33,8 @@ export default class Template {
   }
 
   render() {
+    this.getSortingConfigFromSessionStorage();
+
     const element = document.createElement('div');
 
     element.innerHTML = this.template;
@@ -50,18 +52,9 @@ export default class Template {
   }
 
   renderTableHeader() {
-    //TODO:
-    const sortConfigFromSessionStorage = JSON.parse(sessionStorage.getItem(this.TEXT_SORT_CONFIG));
-    const isSortConfigSessionStorage = !!Object.keys(sortConfigFromSessionStorage || {}).length;
-    let sortParam = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortParam : this.defaultSortConfig.sortParam;
-    let sortDirection = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortDirection : this.defaultSortConfig.sortDirection;
-
     let emptyTableHeaderCell;
-
-    console.log(this.sortParam)
-
     let tableTitle = this.configuration.map(
-      (elem) => `<th data-id="${elem.toLowerCase()}" ${this.dataSortingDirection}${elem.toLowerCase() === this.sortParam ? `="${sortDirection}"` : ''} >${elem}</th>`
+      (elem) => `<th data-id="${elem.toLowerCase()}" ${this.dataSortingDirection}${elem.toLowerCase() === this.sortParam ? `="${this.sortDirection}"` : ''} >${elem}</th>`
     ).join('');
 
     if (this.data.length > 0 && this.configuration.length > 0) {
@@ -136,8 +129,11 @@ export default class Template {
     sessionStorage.setItem(this.TEXT_SORT_CONFIG, JSON.stringify(sortConfig));
   }
 
-  getSortingConfigToSessionStorage() {
-    //TODO:
+  getSortingConfigFromSessionStorage() {
+    const sortConfigFromSessionStorage = JSON.parse(sessionStorage.getItem(this.TEXT_SORT_CONFIG));
+    const isSortConfigSessionStorage = !!Object.keys(sortConfigFromSessionStorage || {}).length;
+    this.sortParam = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortParam : this.defaultSortConfig.sortParam;
+    this.sortDirection = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortDirection : this.defaultSortConfig.sortDirection;
   }
 
   removeSortingStatus() {
@@ -149,47 +145,40 @@ export default class Template {
     const sortDirectionUp = 'up';
     const sortDirectionDown = 'down';
 
-    //TODO:
-    const sortConfigFromSessionStorage = JSON.parse(sessionStorage.getItem(this.TEXT_SORT_CONFIG));
-    const isSortConfigSessionStorage = !!Object.keys(sortConfigFromSessionStorage || {}).length;
-    let sortParam = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortParam : this.defaultSortConfig.sortParam;
-    let sortDirection = isSortConfigSessionStorage ? sortConfigFromSessionStorage.sortDirection : this.defaultSortConfig.sortDirection;
-    let sortedArr;
+    if (this.sortParam === elem.dataset.id) {
+      const currentSortDirection = elem.getAttribute(this.dataSortingDirection);
 
-    // console.log(elem)
-    // console.log(elem.dataset.id)
-
-    // console.log({isSortConfigSessionStorage})
-    // console.log({sortConfigFromSessionStorage})
-    // console.log(this.defaultSortConfig)
-    // console.log({sortParam})
-    // console.log({sortDirection})
-
-    // this.sortParam = elem.dataset.id;
-
-    if (sortParam === 'avatar') {
-      return false;
-    } else if (sortParam === 'number of episodes') {
-      sortParam = 'episode';
-      if (sortDirection === sortDirectionDown) {
-        sortedArr = [...this.data].sort((a, b) => (a[sortParam].length > b[sortParam].length) ? 1 : -1);
-        sortDirection = sortDirectionUp;
+      if (currentSortDirection && (currentSortDirection === sortDirectionDown)) {
+        this.setSortingConfigToSessionStorage(elem.dataset.id, sortDirectionUp);
       } else {
-        sortedArr = [...this.data].sort((a, b) => (a[sortParam].length > b[sortParam].length) ? -1 : 1);
-        sortDirection = sortDirectionDown;
+        this.setSortingConfigToSessionStorage(elem.dataset.id, sortDirectionDown);
       }
     } else {
-      if (sortDirection === sortDirectionDown) {
-        sortedArr = [...this.data].sort((a, b) => (a[sortParam] > b[sortParam]) ? 1 : -1);
-        sortDirection = sortDirectionUp;
+      this.removeSortingStatus();
+      this.setSortingConfigToSessionStorage(elem.dataset.id, sortDirectionDown);
+    }
+
+    this.getSortingConfigFromSessionStorage();
+    let sortedArr;
+
+    if (this.sortParam === 'avatar') {
+      return false;
+    } else if (this.sortParam === 'number of episodes') {
+      const sortParam = 'episode';
+      if (this.sortDirection === sortDirectionDown) {
+        sortedArr = [...this.data].sort((a, b) => (a[sortParam].length > b[sortParam].length) ? 1 : -1);
       } else {
-        sortedArr = [...this.data].sort((a, b) => (a[sortParam] > b[sortParam]) ? -1 : 1);
-        sortDirection = sortDirectionDown;
+        sortedArr = [...this.data].sort((a, b) => (a[sortParam].length > b[sortParam].length) ? -1 : 1);
+      }
+    } else {
+      if (this.sortDirection === sortDirectionDown) {
+        sortedArr = [...this.data].sort((a, b) => (a[this.sortParam] > b[this.sortParam]) ? 1 : -1);
+      } else {
+        sortedArr = [...this.data].sort((a, b) => (a[this.sortParam] > b[this.sortParam]) ? -1 : 1);
       }
     }
 
     this.sortedData = sortedArr;
-    this.setSortingConfigToSessionStorage(sortParam, sortDirection);
     this.update();
   }
 
